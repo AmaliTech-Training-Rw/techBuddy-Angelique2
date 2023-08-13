@@ -20,11 +20,11 @@ class UploadComponent extends Component {
     const uploadPromises = imageArray.map(async (image) => {
       const formData = new FormData();
       formData.append('file', image);
-      formData.append('upload_preset', 'my_upload_preset'); // Replace with your Cloudinary upload preset
+      formData.append('upload_preset', 'my_upload_preset');
 
       try {
         const response = await axios.post(
-          'https://api.cloudinary.com/v1_1/dqtlfgnmh/image/upload', // Replace with your Cloudinary cloud name
+          'https://api.cloudinary.com/v1_1/dqtlfgnmh/image/upload',
           formData
         );
 
@@ -48,11 +48,11 @@ class UploadComponent extends Component {
     const uploadPromises = videoArray.map(async (video) => {
       const formData = new FormData();
       formData.append('file', video);
-      formData.append('upload_preset', 'my_upload_preset'); // Replace with your Cloudinary upload preset
+      formData.append('upload_preset', 'my_upload_preset'); 
 
       try {
         const response = await axios.post(
-          'https://api.cloudinary.com/v1_1/dqtlfgnmh/video/upload', // Replace with your Cloudinary cloud name
+          'https://api.cloudinary.com/v1_1/dqtlfgnmh/video/upload', 
           formData
         );
 
@@ -87,60 +87,53 @@ class UploadComponent extends Component {
 
     return (
       <div>
-        <h2>Image Upload</h2>
-        <input type="file" accept="image/*" onChange={this.handleImageInputChange} multiple />
-        <button onClick={this.handleImagesUpload}>Upload Images</button>
+  <div>
+    <h2>Image Upload</h2>
+    <input type="file" accept="image/*" onChange={this.handleImageInputChange} multiple />
+    <button onClick={this.handleImagesUpload}>Upload Images</button>
+  </div>
 
-        {uploadedImages.length > 0 && (
-          <div>
-            <h3>Uploaded Images:</h3>
-            {uploadedImages.map((url, index) => (
-              <Image key={index} cloudName="dqtlfgnmh" publicId={url} />
-            ))}
+  {uploadedImages.length > 0 && (
+    <div>
+      <h3>Uploaded Images:</h3>
+      <div className="file-list">
+        {uploadedImages.map((url, index) => (
+          <div key={index} className="file-item">
+            <Image cloudName="dqtlfgnmh" publicId={url} width="100" height="100" />
+            <button onClick={() => this.handleDownload(url)}>Download</button>
           </div>
-        )}
-
-        <h2>Video Upload</h2>
-        <input type="file" accept="video/*" onChange={this.handleVideoInputChange} multiple />
-        <button onClick={this.handleVideosUpload}>Upload Videos</button>
-
-        {uploadedVideos.length > 0 && (
-          <div>
-            <h3>Uploaded Videos:</h3>
-            {uploadedVideos.map((url, index) => (
-              <Video key={index} cloudName="dqtlfgnmh" publicId={url} controls />
-            ))}
-          </div>
-        )}
-{/* Display buttons to download uploaded files */}
-<div>
-  <h3>Download Images:</h3>
-  {uploadedImages.map((url, index) => (
-    <div key={index}>
-      <Image cloudName="dqtlfgnmh" publicId={url} width="100" height="100" />
-      <button onClick={() => this.handleDownload(url)}>Download</button>
-    </div>
-  ))}
-</div>
-
-<div>
-  <h3>Download Videos:</h3>
-  {uploadedVideos.map((url, index) => (
-    <div key={index}>
-      <Video cloudName="dqtlfgnmh" publicId={url} controls width="300" height="200" />
-      <button onClick={() => this.handleDownload(url)}>Download</button>
-    </div>
-  ))}
-</div>
-
-
+        ))}
       </div>
+    </div>
+  )}
+
+  <div>
+    <h2>Video Upload</h2>
+    <input type="file" accept="video/*" onChange={this.handleVideoInputChange} multiple />
+    <button onClick={this.handleVideosUpload}>Upload Videos</button>
+  </div>
+
+  {uploadedVideos.length > 0 && (
+    <div>
+      <h3>Uploaded Videos:</h3>
+      <div className="file-list">
+        {uploadedVideos.map((url, index) => (
+          <div key={index} className="file-item">
+            <Video cloudName="dqtlfgnmh" publicId={url} controls width="300" height="200" />
+            <button onClick={() => this.handleDownload(url)}>Download</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
+
     );
   }
 }
 
 const App = () => (
-  <CloudinaryContext cloudName="dqtlfgnmh"> {/* Replace with your Cloudinary cloud name */}
+  <CloudinaryContext cloudName="dqtlfgnmh">
     <UploadComponent />
   </CloudinaryContext>
 );
