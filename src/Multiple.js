@@ -18,6 +18,10 @@ class UploadComponent extends Component {
     const imageArray = Array.from(selectedImages);
 
     const uploadPromises = imageArray.map(async (image) => {
+      if (!image) {
+        return null; 
+      }
+
       const formData = new FormData();
       formData.append('file', image);
       formData.append('upload_preset', 'my_upload_preset');
@@ -38,21 +42,39 @@ class UploadComponent extends Component {
       }
     });
 
-    const uploadedImages = await Promise.all(uploadPromises);
+    const uploadedImages = await Promise.all(uploadPromises.filter(url => url !== null));
     this.setState({ uploadedImages });
   };
 
   handleVideosUpload = async () => {
     const { selectedVideos } = this.state;
     const videoArray = Array.from(selectedVideos);
+
+    const maxVideoSize = 1024 * 1024 * 100; 
+    const maxVideoDurationInSeconds = 120; 
+
     const uploadPromises = videoArray.map(async (video) => {
+      if (!video) {
+        return null; 
+      }
+
+      if (video.size > maxVideoSize) {
+        console.error('Video too large:', video);
+        return null;
+      }
+
+      if (video.duration > maxVideoDurationInSeconds) {
+        console.error('Video too long:', video);
+        return null;
+      }
+
       const formData = new FormData();
       formData.append('file', video);
-      formData.append('upload_preset', 'my_upload_preset'); 
+      formData.append('upload_preset', 'my_upload_preset');
 
       try {
         const response = await axios.post(
-          'https://api.cloudinary.com/v1_1/dqtlfgnmh/video/upload', 
+          'https://api.cloudinary.com/v1_1/dqtlfgnmh/video/upload',
           formData
         );
 
@@ -63,9 +85,10 @@ class UploadComponent extends Component {
       }
     });
 
-    const uploadedVideos = await Promise.all(uploadPromises);
+    const uploadedVideos = await Promise.all(uploadPromises.filter(url => url !== null));
     this.setState({ uploadedVideos });
   };
+
   handleDownload = (url) => {
     const link = document.createElement('a');
     link.href = url;
@@ -87,47 +110,46 @@ class UploadComponent extends Component {
 
     return (
       <div>
-  <div>
-    <h2>Image Upload</h2>
-    <input type="file" accept="image/*" onChange={this.handleImageInputChange} multiple />
-    <button onClick={this.handleImagesUpload}>Upload Images</button>
-  </div>
+        <div>
+          <h2>Image Upload</h2>
+          <input type="file" accept="image/*" onChange={this.handleImageInputChange} multiple />
+          <button onClick={this.handleImagesUpload}>Upload Images</button>
+        </div>
 
-  {uploadedImages.length > 0 && (
-    <div>
-      <h3>Uploaded Images:</h3>
-      <div className="file-list">
-        {uploadedImages.map((url, index) => (
-          <div key={index} className="file-item">
-            <Image cloudName="dqtlfgnmh" publicId={url} width="100" height="100" />
-            <button onClick={() => this.handleDownload(url)}>Download</button>
+        {uploadedImages.length > 0 && (
+          <div>
+            <h3>Uploaded Images:</h3>
+            <div className="file-list">
+              {uploadedImages.map((url, index) => (
+                <div key={index} className="file-item">
+                  <Image cloudName="dqtlfgnmh" publicId={url} width="100" height="100" />
+                  <button onClick={() => this.handleDownload(url)}>Download</button>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
-    </div>
-  )}
+        )}
 
-  <div>
-    <h2>Video Upload</h2>
-    <input type="file" accept="video/*" onChange={this.handleVideoInputChange} multiple />
-    <button onClick={this.handleVideosUpload}>Upload Videos</button>
-  </div>
+        <div>
+          <h2>Video Upload</h2>
+          <input type="file" accept="video/*" onChange={this.handleVideoInputChange} multiple />
+          <button onClick={this.handleVideosUpload}>Upload Videos</button>
+        </div>
 
-  {uploadedVideos.length > 0 && (
-    <div>
-      <h3>Uploaded Videos:</h3>
-      <div className="file-list">
-        {uploadedVideos.map((url, index) => (
-          <div key={index} className="file-item">
-            <Video cloudName="dqtlfgnmh" publicId={url} controls width="300" height="200" />
-            <button onClick={() => this.handleDownload(url)}>Download</button>
+        {uploadedVideos.length > 0 && (
+          <div>
+            <h3>Uploaded Videos:</h3>
+            <div className="file-list">
+              {uploadedVideos.map((url, index) => (
+                <div key={index} className="file-item">
+                  <Video cloudName="dqtlfgnmh" publicId={url} controls width="300" height="200" />
+                  <button onClick={() => this.handleDownload(url)}>Download</button>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  )}
-</div>
-
     );
   }
 }
