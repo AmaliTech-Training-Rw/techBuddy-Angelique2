@@ -1,0 +1,68 @@
+{
+     "swagger": "2.0",
+     "info": {
+          "title": "Cloudinary API Documentation",
+          "version": "1.0.0"
+     },
+     "basePath": "/",
+     "paths": {
+          "/v1_1/dqtlfgnmh/image/upload": {
+               "post": {
+                    "summary": "Upload an image to Cloudinary",
+                    "consumes": [
+                         "multipart/form-data"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "formData",
+                              "name": "file",
+                              "type": "file",
+                              "required": true,
+                              "description": "The image file to upload"
+                         },
+                         {
+                              "in": "formData",
+                              "name": "upload_preset",
+                              "type": "string",
+                              "required": true,
+                              "description": "Cloudinary upload preset"
+                         }
+                    ],
+                    "responses": {
+                         "200": {
+                              "description": "Image uploaded successfully"
+                         }
+                    }
+               }
+          },
+          "/v1_1/dqtlfgnmh/video/upload": {
+               "post": {
+                    "summary": "Upload a video to Cloudinary",
+                    "consumes": [
+                         "multipart/form-data"
+                    ],
+                    "parameters": [
+                         {
+                              "in": "formData",
+                              "name": "file",
+                              "type": "file",
+                              "required": true,
+                              "description": "The video file to upload"
+                         },
+                         {
+                              "in": "formData",
+                              "name": "upload_preset",
+                              "type": "string",
+                              "required": true,
+                              "description": "Cloudinary upload preset"
+                         }
+                    ],
+                    "responses": {
+                         "200": {
+                              "description": "Video uploaded successfully"
+                         }
+                    }
+               }
+          }
+     }
+}
