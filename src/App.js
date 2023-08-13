@@ -1,5 +1,4 @@
 import Multiple from "./Multiple"
-// import Upload from "./Upload"
 function App() {
   return (
    <>
