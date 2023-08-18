@@ -1,25 +1,42 @@
-import React, { Component } from 'react';
+import React, { useState, useContext} from 'react';
+
 import { CloudinaryContext, Image, Video } from 'cloudinary-react';
 import axios from 'axios';
+import { AuthContext } from './AuthProvider';
 
-class UploadComponent extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      uploadedImages: [],
-      uploadedVideos: [],
-      selectedImages: [],
-      selectedVideos: [],
-    };
+const UploadComponent = () => {
+
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedVideos, setUploadedVideos] = useState([]);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedVideos, setSelectedVideos] = useState([]);
+  const [error, setError] = useState("")
+  const { user, login } = useContext(AuthContext);
+  const [registrationMessage, setRegistrationMessage] = useState('');
+  const [loginMessage, setloginMessage] = useState("");
+
+  const [loginState, setLoginState] = useState({
+    email: "",
+    password: ""
+  })
+
+  const handleFormChange = (e) => {
+    e.preventDefault()
+    setLoginState({
+      ...loginState,
+      [e.target.name]: e.target.value
+    })
   }
 
-  handleImagesUpload = async () => {
-    const { selectedImages } = this.state;
+
+
+
+  const handleImagesUpload = async () => {
     const imageArray = Array.from(selectedImages);
 
     const uploadPromises = imageArray.map(async (image) => {
       if (!image) {
-        return null; 
+        return null;
       }
 
       const formData = new FormData();
@@ -43,19 +60,18 @@ class UploadComponent extends Component {
     });
 
     const uploadedImages = await Promise.all(uploadPromises.filter(url => url !== null));
-    this.setState({ uploadedImages });
+    setUploadedImages(uploadedImages);
   };
 
-  handleVideosUpload = async () => {
-    const { selectedVideos } = this.state;
+  const handleVideosUpload = async () => {
     const videoArray = Array.from(selectedVideos);
 
-    const maxVideoSize = 1024 * 1024 * 100; 
-    const maxVideoDurationInSeconds = 120; 
+    const maxVideoSize = 1024 * 1024 * 100;
+    const maxVideoDurationInSeconds = 120;
 
     const uploadPromises = videoArray.map(async (video) => {
       if (!video) {
-        return null; 
+        return null;
       }
 
       if (video.size > maxVideoSize) {
@@ -86,10 +102,10 @@ class UploadComponent extends Component {
     });
 
     const uploadedVideos = await Promise.all(uploadPromises.filter(url => url !== null));
-    this.setState({ uploadedVideos });
+    setUploadedVideos(uploadedVideos);
   };
 
-  handleDownload = (url) => {
+  const handleDownload = (url) => {
     const link = document.createElement('a');
     link.href = url;
     link.download = url.substring(url.lastIndexOf('/') + 1);
@@ -97,62 +113,121 @@ class UploadComponent extends Component {
     link.click();
   };
 
-  handleImageInputChange = (event) => {
-    this.setState({ selectedImages: event.target.files });
+  const handleImageInputChange = (event) => {
+    setSelectedImages(event.target.files);
   };
 
-  handleVideoInputChange = (event) => {
-    this.setState({ selectedVideos: event.target.files });
+  const handleVideoInputChange = (event) => {
+    setSelectedVideos(event.target.files);
   };
 
-  render() {
-    const { uploadedImages, uploadedVideos } = this.state;
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/register', {
+        email: e.target.email.value,
+        password: e.target.password.value
+      });
 
-    return (
-      <div>
-        <div>
-          <h2>Image Upload</h2>
-          <input type="file" accept="image/*" onChange={this.handleImageInputChange} multiple />
-          <button onClick={this.handleImagesUpload}>Upload Images</button>
-        </div>
+      if (response.status === 201) {
+        setRegistrationMessage('User registered successfully');
+      }
 
-        {uploadedImages.length > 0 && (
-          <div>
-            <h3>Uploaded Images:</h3>
-            <div className="file-list">
-              {uploadedImages.map((url, index) => (
-                <div key={index} className="file-item">
-                  <Image cloudName="dqtlfgnmh" publicId={url} width="100" height="100" />
-                  <button onClick={() => this.handleDownload(url)}>Download</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+    } catch (error) {
+      console.log(error)
+      setError(error?.response?.data?.message)
+    }
 
-        <div>
-          <h2>Video Upload</h2>
-          <input type="file" accept="video/*" onChange={this.handleVideoInputChange} multiple />
-          <button onClick={this.handleVideosUpload}>Upload Videos</button>
-        </div>
-
-        {uploadedVideos.length > 0 && (
-          <div>
-            <h3>Uploaded Videos:</h3>
-            <div className="file-list">
-              {uploadedVideos.map((url, index) => (
-                <div key={index} className="file-item">
-                  <Video cloudName="dqtlfgnmh" publicId={url} controls width="300" height="200" />
-                  <button onClick={() => this.handleDownload(url)}>Download</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
   }
-}
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await login(loginState)
+
+    } catch (error) {
+      console.log(error)
+      setError(error?.response?.data?.message)
+    }
+
+  }
+  return (
+    <div>
+      {user ? (
+        <div>
+          <div>
+            <h2>Image Upload</h2>
+            <input type="file" accept="image/*" onChange={handleImageInputChange} multiple />
+            <button onClick={handleImagesUpload}>Upload Images</button>
+          </div>
+
+          {uploadedImages.length > 0 && (
+            <div>
+              <h3>Uploaded Images:</h3>
+              <div className="file-list">
+                {uploadedImages.map((url, index) => (
+                  <div key={index} className="file-item">
+                    <Image cloudName="dqtlfgnmh" publicId={url} width="100" height="100" />
+                    <button onClick={() => handleDownload(url)}>Download</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div>
+            <h2>Video Upload</h2>
+            <input type="file" accept="video/*" onChange={handleVideoInputChange} multiple />
+            <button onClick={handleVideosUpload}>Upload Videos</button>
+          </div>
+
+          {uploadedVideos.length > 0 && (
+            <div>
+              <h3>Uploaded Videos:</h3>
+              <div className="file-list">
+                {uploadedVideos.map((url, index) => (
+                  <div key={index} className="file-item">
+                    <Video cloudName="dqtlfgnmh" publicId={url} controls width="300" height="200" />
+                    <button onClick={() => handleDownload(url)}>Download</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          <p>Please log in or register to upload and download files.</p>
+          <div>
+            <h2>Login</h2>
+            <form onSubmit={handleLogin}>
+
+              <input type="email" name="email" placeholder="Email" required onChange={handleFormChange} />
+              <input type="password" name="password" placeholder="Password" required onChange={handleFormChange} />
+              <button type="submit">Login</button>
+            </form>
+            {loginMessage && <p>{loginMessage}</p>}
+          </div>
+          <div>
+            <h2>Register</h2>
+            <form onSubmit={handleRegister}>
+              {
+                error &&
+                <div style={{ color: "red", padding: '4px', border: "1px solid red" }}>
+                  {error}
+                </div>
+              }
+              <input type="email" name="email" placeholder="Email" required onChange={handleFormChange} />
+              <input type="password" name="password" placeholder="Password" required onChange={handleFormChange} />
+              <button type="submit">Register</button>
+            </form>
+            {registrationMessage && <p>{registrationMessage}</p>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const App = () => (
   <CloudinaryContext cloudName="dqtlfgnmh">
