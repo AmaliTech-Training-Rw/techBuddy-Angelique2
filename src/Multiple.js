@@ -1,7 +1,6 @@
 import React, { useState, useContext} from 'react';
-
 import { CloudinaryContext, Image, Video } from 'cloudinary-react';
-import axios from 'axios';
+import axios from "axios"
 import { AuthContext } from './AuthProvider';
 
 const UploadComponent = () => {
